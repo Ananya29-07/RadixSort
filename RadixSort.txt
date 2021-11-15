@@ -1,0 +1,180 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<time.h>
+#define MAX_NUM 100000
+typedef struct {
+void main()
+{ iniArray()
+findLargestNum
+radixSort(arr,n)
+printArr(arr,n)
+}
+void radixSort(int arr[], int n)
+{
+//Sort the array
+} 
+int getLargestNum
+{
+//get maximum number
+}
+void printArr(int arr[], int n)
+{
+//Show the sorted array
+printf("%d",arr[i]);
+}
+void iniArray()
+{
+//read array from file
+}
+ int size;
+ int *arr;
+} parameters;
+int array[MAX_NUM], a[MAX_NUM], b[MAX_NUM];
+size_t array_size = 0, a_size = 0, b_size = 0;
+void iniArr() 
+{
+ int i = 0;
+ FILE *fp;
+ if (fp = fopen("numbers.txt", "r")) {
+ while (fscanf(fp, "%d", &array[i]) != EOF) 
+ {
+ ++i;
+ }
+ fclose(fp);
+ }
+ array_size = i;
+}
+void printArr(int *arr, size_t size)
+{
+ for(size_t i = 0; i != size; i++)
+ {
+ printf("%d ", arr[i]);
+ }
+ printf("\n");
+}
+void split_array()
+{
+ size_t i, j;
+ if(array_size % 2 == 0) 
+ {
+ a_size = array_size / 2;
+ b_size = array_size / 2;
+ for (i = 0; i < a_size; ++i)
+ {
+ a[i] = array[i];
+ }
+ for (j = 0; j < b_size; ++j)
+ {
+ b[j] = array[j + i];
+ }
+ }
+ else 
+ {
+ a_size = array_size / 2;
+ b_size = (array_size / 2) + 1; 
+ for (i = 0; i < a_size; ++i)
+ {
+ a[i] = array[i];
+ }
+ for (j = 0; j < b_size; ++j)
+ {
+ b[j] = array[j + i];
+ }
+ }
+}
+int findLargestNum(int * array, int size)
+{
+ int i;
+ int largestNum = -1;
+ for(i = 0; i < size; i++)
+ {
+ if(array[i] > largestNum)
+ largestNum = array[i];
+ }
+ return largestNum;
+}
+void radixSort(parameters *param)
+{
+ int size = param->size;
+ int *temp = param->arr;
+ int i;
+ int semiSorted[size];
+ int significantDigit = 1;
+ int largestNum = findLargestNum(temp, size);
+ while (largestNum / significantDigit > 0)
+ { 
+ int bucket[10] = { 0 };
+ for (i = 0; i < size; i++)
+ bucket[(temp[i] / significantDigit) % 10]++;
+ for (i = 1; i < 10; i++)
+ bucket[i] += bucket[i - 1];
+ for (i = size - 1; i >= 0; i--)
+ semiSorted[--bucket[(temp[i] / significantDigit) % 10]] = temp[i];
+ for (i = 0; i < size; i++)
+ temp[i] = semiSorted[i];
+ significantDigit *= 10; 
+ }
+}
+void merge_array(int *result) {
+ size_t low1 = 0, high1 = a_size;
+ size_t low2 = 0, high2 = b_size;
+ size_t i = 0;
+ while(low1 < high1 && low2 < high2) {
+ if(a[low1] < b[low2]) 
+ {
+ result[i] = a[low1];
+ low1++;
+ }
+ else {
+ result[i] = b[low2];
+ low2++;
+ }
+ i++;
+ }
+ while(low1 < high1)
+ {
+ result[i] = a[low1];
+ i++;
+ low1++;
+ }
+ while(low2 < high2) 
+ {
+ result[i] = b[low2];
+ i++;
+ low2++;
+ }
+}
+void main() {
+ pthread_t tid[2];
+ pthread_attr_t attr;
+ parameters params[2];
+ clock_t start_time, end_time;
+ iniArr();
+ split_array();
+ pthread_attr_init(&attr);
+ params[0].size = a_size; params[0].arr = a;
+ params[1].size = b_size; params[1].arr = b;
+ int *sorted_array = malloc(sizeof(int) * array_size);
+ start_time = clock();
+ for(int i = 0; i < 2; i++) 
+ {
+ pthread_create(&tid[i], &attr, radixSort, &params[i]);
+ }
+ for(int i = 0; i < 2; i++)
+ {
+ pthread_join(tid[i], NULL);
+ }
+ merge_array(sorted_array);
+ end_time = clock();
+ printf("\nOriginal Array:\n");
+ printArr(array, array_size);
+ printf("\nThread 0:\n");
+ printArr(a, a_size);
+ printf("\nThead 1:\n");
+ printArr(b, b_size);
+ printf("\nAfter merging:\n");
+ printArr(sorted_array, array_size);
+ printf("\nTime Taken: %f\n", (end_time - start_time) / 
+(double)CLOCKS_PER_SEC);
+}
